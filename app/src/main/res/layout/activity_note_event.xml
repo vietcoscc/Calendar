@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_note_event"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.vaio.calendar.NoteEventActivity">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/lightBlue500">
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:src="@drawable/calendar" />
+
+        <TextView
+            style="?android:attr/textAppearanceLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_toRightOf="@id/icon"
+            android:text="Nhắc việc"
+            android:textColor="@color/black" />
+    </RelativeLayout>
+    <ScrollView
+        android:fillViewport="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+
+
+            <TextView
+                android:id="@+id/tvTitle"
+                style="?android:attr/textAppearanceLarge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:gravity="center"
+                android:text="asfsf"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:text="Tên ghi nhớ"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/edtNoteName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:layout_marginRight="@dimen/activity_vertical_margin"
+                android:hint="Nhập tên ghi nhớ ..."
+                android:textColorHint="@color/lightBlue700" />
+
+            <TextView
+                android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:text="Nội dung ghi nhớ"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/edtNoteContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:layout_marginRight="@dimen/activity_vertical_margin"
+                android:hint="Nhập nội dung ghi nhớ ..."
+                android:textColorHint="@color/lightBlue700" />
+
+            <TextView
+                android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:text="Thời gian"
+                android:textColor="@color/black" />
+
+            <TimePicker
+                android:id="@+id/timePicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:timePickerMode="spinner"></TimePicker>
+
+
+            <Spinner
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:id="@+id/spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"></Spinner>
+
+
+            <TextView
+                android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:text="Mức độ cảnh báo"
+                android:textColor="@color/black" />
+
+            <RadioGroup
+                android:weightSum="2"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:layout_weight="1"
+                    android:id="@+id/radioNormal"
+                    style="?android:attr/radioButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bình thường"
+                    android:textColor="@color/black" />
+
+                <RadioButton
+                    android:layout_weight="1"
+                    android:id="@+id/radioImportain"
+                    style="?android:attr/radioButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Quan trọng"
+                    android:textColor="@color/black" />
+
+            </RadioGroup>
+
+
+            <TextView
+                android:textStyle="bold"
+                android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:text="Lặp báo thức"
+                android:textColor="@color/black" />
+
+            <RadioGroup
+                android:weightSum="2"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginBottom="@dimen/activity_horizontal_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:layout_weight="1"
+                    android:id="@+id/radioUnLoop"
+                    style="?android:attr/radioButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Không"
+                    android:textColor="@color/black" />
+
+                <RadioButton
+                    android:layout_weight="1"
+                    android:id="@+id/radioLoop"
+                    style="?android:attr/radioButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lặp"
+                    android:textColor="@color/black" />
+            </RadioGroup>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <Button
+                    android:id="@+id/btnSave"
+                    android:text="Lưu"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+                <Button
+                    android:id="@+id/btnCancel"
+                    android:text="Hủy"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </ScrollView>
+</LinearLayout>
