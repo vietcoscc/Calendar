@@ -1,5 +1,6 @@
 package com.t3h.database;
 
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -118,6 +119,13 @@ public class MyDatabase {
         openDatabase();
         String whereArgs[]={eventCalendar.getDate()+""};
         long row = database.update(TBNAME,contentValues,DATE+" = ?",whereArgs);
+        closeDatabase();
+        return row;
+    }
+    public int deleteEvent(EventCalendar eventCalendar){
+        openDatabase();
+        String whereArgs []={eventCalendar.getDate()+""};
+        int row = database.delete(TBNAME,DATE +" = ?",whereArgs);
         closeDatabase();
         return row;
     }

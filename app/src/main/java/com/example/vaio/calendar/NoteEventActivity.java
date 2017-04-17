@@ -1,17 +1,27 @@
 package com.example.vaio.calendar;
 
+import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Parcelable;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -19,8 +29,11 @@ import android.widget.Toast;
 
 import com.t3h.database.MyDatabase;
 import com.t3h.item.EventCalendar;
+import com.t3h.service.MyService;
 
-public class NoteEventActivity extends AppCompatActivity implements View.OnClickListener {
+public class NoteEventActivity extends AppCompatActivity implements View.OnClickListener, View.OnFocusChangeListener{
+    private static final String KEY = "xx";
+    private static final int FLAG = 1;
     private TextView tvTitle;
     private EditText edtNoteName;
     private EditText edtNoteContent;
@@ -35,6 +48,7 @@ public class NoteEventActivity extends AppCompatActivity implements View.OnClick
     private MyDatabase database;
     private boolean hasEvent;
     private EventCalendar eventCalendar;
+    private ScrollView scrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +59,7 @@ public class NoteEventActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void initViews() {
+        scrollView = (ScrollView) findViewById(R.id.scrollView);
         tvTitle = (TextView) findViewById(R.id.tvTitle);
         edtNoteName = (EditText) findViewById(R.id.edtNoteName);
         edtNoteContent = (EditText) findViewById(R.id.edtNoteContent);
@@ -56,7 +71,7 @@ public class NoteEventActivity extends AppCompatActivity implements View.OnClick
         radioLoop = (RadioButton) findViewById(R.id.radioLoop);
         btnSave = (Button) findViewById(R.id.btnSave);
         btnCancel = (Button) findViewById(R.id.btnCancel);
-        timePicker.setIs24HourView(true);
+        timePicker.setIs24HourView(false);
         //
         String s[] = {"Chỉ ngày hiện tại", "Mọi ngày"};
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, s);
@@ -75,6 +90,12 @@ public class NoteEventActivity extends AppCompatActivity implements View.OnClick
         tvTitle.setText("Ngày " + date + " Tháng " + month + " Năm " + year);
         btnSave.setOnClickListener(this);
         btnCancel.setOnClickListener(this);
+        edtNoteContent.setOnFocusChangeListener(this);
+        edtNoteName.setOnFocusChangeListener(this);
+        radioNormal.setOnClickListener(this);
+        radioImportain.setOnClickListener(this);
+        radioUnLoop.setOnClickListener(this);
+        radioLoop.setOnClickListener(this);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -84,13 +105,14 @@ public class NoteEventActivity extends AppCompatActivity implements View.OnClick
         int dateIntent = intent.getExtras().getInt(MainFragment.DATE);
         int monthIntent = intent.getExtras().getInt(MainFragment.MONTH);
         int yearIntent = intent.getExtras().getInt(MainFragment.YEAR);
-
+        edtNoteName.clearFocus();
+        edtNoteContent.clearFocus();
         switch (v.getId()) {
             case R.id.btnSave:
                 String date = dateIntent + "/" + monthIntent + "/" + yearIntent;
                 String noteName = edtNoteName.getText().toString();
                 String noteContent = edtNoteContent.getText().toString();
-                String time =  timePicker.getHour()+ ":" +timePicker.getMinute() ;
+                String time = timePicker.getCurrentHour() + ":" + timePicker.getCurrentMinute();
                 int mode = spinner.getSelectedItemPosition();
                 int warninglevels;
                 if (radioNormal.isChecked()) {
@@ -111,31 +133,94 @@ public class NoteEventActivity extends AppCompatActivity implements View.OnClick
                         && (radioLoop.isChecked() || radioUnLoop.isChecked()) && (radioNormal.isChecked() || radioImportain.isChecked())) {
                     if (hasEvent) {
                         long row = database.updateEvent(eventCalendar);
-                        if(row>0){
-                            Toast.makeText(this,"Success",Toast.LENGTH_SHORT).show();
-                        }else {
-                            Toast.makeText(this,"Fail",Toast.LENGTH_SHORT).show();
+                        if (row > 0) {
+                            Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, "Fail", Toast.LENGTH_SHORT).show();
                         }
                     } else {
 
                         long id = database.insertEvent(eventCalendar);
-                        if(id!=-1){
-                            Toast.makeText(this,"Success",Toast.LENGTH_SHORT).show();
-                        }else {
-                            Toast.makeText(this,"Fail",Toast.LENGTH_SHORT).show();
+                        if (id != -1) {
+                            Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, "Fail", Toast.LENGTH_SHORT).show();
                         }
                     }
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.SYSTEM_ALERT_WINDOW) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SYSTEM_ALERT_WINDOW}, 1);
+                    }
                     setResult(RESULT_OK);
+                    Intent intent2 = new Intent(this, MyService.class);
+                    startService(intent2);
+
+
+                    intent.putExtra(KEY, "Hello from the other side");
                     finish();
-                }else {
-                    Toast.makeText(this,"Không được để trống các trường",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Không được để trống các trường", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case R.id.btnCancel:
+
+                showCancelDialog();
+                break;
+            case R.id.radioNormal:
+                edtNoteName.clearFocus();
+                edtNoteName.clearFocus();
+                break;
+            case R.id.radioImportain:
+                edtNoteName.clearFocus();
+                edtNoteName.clearFocus();
+                break;
+            case R.id.radioLoop:
+                edtNoteName.clearFocus();
+                edtNoteName.clearFocus();
+                break;
+            case R.id.radioUnLoop:
+                edtNoteName.clearFocus();
+                edtNoteName.clearFocus();
+                break;
+        }
+
+    }
+
+    public void showCancelDialog() {
+        edtNoteName.clearFocus();
+        edtNoteName.clearFocus();
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_Dialog);
+        builder.setTitle("Bạn có muốn hủy bỏ không ? ");
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
                 setResult(RESULT_CANCELED);
                 finish();
-                break;
+            }
+        });
+        builder.create().show();
+    }
+
+    public void hideSoftKeyboard(View v) {
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+//        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+    }
+
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        if (!hasFocus) {
+            hideSoftKeyboard(v);
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        showCancelDialog();
+    }
 }

@@ -41,7 +41,20 @@ public class EventCalendar implements Serializable{
     public String getDate() {
         return date;
     }
-
+    public int getHour(){
+        if(time!=null) {
+            return Integer.parseInt(time.split(":")[0]);
+        }else {
+            return 0;
+        }
+    }
+    public int getMinute(){
+        if(time!=null) {
+            return Integer.parseInt(time.split(":")[1]);
+        }else {
+            return 0;
+        }
+    }
     public void setDate(String date) {
         this.date = date;
     }

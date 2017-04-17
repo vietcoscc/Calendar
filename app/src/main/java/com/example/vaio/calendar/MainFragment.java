@@ -1,5 +1,6 @@
 package com.example.vaio.calendar;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
@@ -11,7 +12,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
@@ -31,6 +34,7 @@ import com.t3h.database.MyDatabase;
 import com.t3h.item.Date;
 import com.t3h.item.EventCalendar;
 import com.t3h.item.Today;
+import com.t3h.service.MyService;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -40,7 +44,7 @@ import java.util.Locale;
  * Created by vaio on 11/12/2016.
  */
 
-public class MainFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemClickListener {
+public class MainFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener, View.OnTouchListener {
     public static final String DATE = "date";
     public static final String MONTH = "month";
     public static final String YEAR = "year";
@@ -65,6 +69,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
     private MyDatabase database;
     private Dialog dialog;
     private Context context;
+    private CalendarAdapter calendarAdapter;
 
     public MainFragment(Context context) {
         this.context = context;
@@ -86,6 +91,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
 //        Toast.makeText(getActivity().getBaseContext(), arrEnventCalendar.get(0).toString(), Toast.LENGTH_SHORT).show();
         btnScheduleList = (ImageButton) v.findViewById(R.id.btnScheduleList);
         btnScheduleList.setOnClickListener(this);
+        btnScheduleList.setOnTouchListener(this);
         ivPrevious = (ImageView) v.findViewById(R.id.btnPrevious);
         ivNext = (ImageView) v.findViewById(R.id.btnNext);
 
@@ -108,46 +114,71 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
     }
 
     public void initCalendar() {
+
         arrEnventCalendar = database.getEvent();
         tvTitile = (TextView) v.findViewById(R.id.tvTitle);
         tvTitile.setText("Tháng " + (currentDisplayMonth + 1) + " Năm " + currentDisplayYear);
         gridView = (GridView) v.findViewById(R.id.gridView);
-        CalendarAdapter calendarAdapter = new CalendarAdapter(getActivity().getBaseContext(), new Date(currentDisplayDate, currentDisplayMonth, currentDisplayYear), arrEnventCalendar);
+        calendarAdapter = new CalendarAdapter(getActivity().getBaseContext(), new Date(currentDisplayDate, currentDisplayMonth, currentDisplayYear), arrEnventCalendar);
         gridView.setAdapter(calendarAdapter);
         gridView.setOnItemClickListener(this);
+        gridView.setOnItemLongClickListener(this);
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        TextView tv = (TextView) view.findViewById(R.id.tvDate);
-        int date = Integer.parseInt(tv.getText().toString());
-        int month = currentDisplayMonth + 1;
-        int year = currentDisplayYear;
+            TextView tv = (TextView) view.findViewById(R.id.tvDate);
+//        int date = Integer.parseInt(tv.getText().toString());
+            int date = position - calendarAdapter.getDayOfWeek() + 2;
+            int month = currentDisplayMonth + 1;
+            int year = currentDisplayYear;
 
-        if (tv.getText() != "0") {
-            Toast.makeText(getActivity().getBaseContext(), date + "/" + month + "/" + year, Toast.LENGTH_SHORT).show();
-        } else {
-            return;
-        }
-        ImageView imageView = (ImageView) view.findViewById(R.id.ivEvent);
-        Intent intent = new Intent(MainFragment.this.getActivity(), NoteEventActivity.class);
-        if (imageView.getVisibility() == View.VISIBLE) {
-            for (int i = 0; i < arrEnventCalendar.size(); i++) {
-                if (arrEnventCalendar.get(i).getDay() == date && arrEnventCalendar.get(i).getMonth() == month && arrEnventCalendar.get(i).getYear() == year) {
-                    intent.putExtra(EVENT_CALENDAR, arrEnventCalendar.get(i));
-                    intent.putExtra(HAS_EVENT, true);
-                    break;
-                }
+            if (tv.getText() != "0") {
+                Toast.makeText(getActivity().getBaseContext(), date + "/" + month + "/" + year, Toast.LENGTH_SHORT).show();
+            } else {
+                return;
             }
-        } else {
-            intent.putExtra(HAS_EVENT, false);
-        }
-        intent.putExtra(DATE, date);
-        intent.putExtra(MONTH, month);
-        intent.putExtra(YEAR, year);
-        getActivity().startActivityForResult(intent, REQUEST_CODE);
+            ImageView imageView = (ImageView) view.findViewById(R.id.ivEvent);
+            Intent intent = new Intent(MainFragment.this.getActivity(), NoteEventActivity.class);
+            if (imageView.getVisibility() == View.VISIBLE) {
+                for (int i = 0; i < arrEnventCalendar.size(); i++) {
+                    if (arrEnventCalendar.get(i).getDay() == date && arrEnventCalendar.get(i).getMonth() == month && arrEnventCalendar.get(i).getYear() == year) {
+                        intent.putExtra(EVENT_CALENDAR, arrEnventCalendar.get(i));
+                        intent.putExtra(HAS_EVENT, true);
+                        break;
+                    }
+                }
+            } else {
+                intent.putExtra(HAS_EVENT, false);
+            }
+            intent.putExtra(DATE, date);
+            intent.putExtra(MONTH, month);
+            intent.putExtra(YEAR, year);
+            getActivity().startActivityForResult(intent, REQUEST_CODE);
+
     }
 
+//    public boolean disableButton() {
+////        ivNext.setClickable(false);
+////        ivPrevious.setClickable(false);
+//        if (gridView.isFocusable() && gridView.isClickable()) {
+//            gridView.setFocusable(false);
+//            gridView.setClickable(false);
+//            return true;
+//        }
+//        return false;
+////        btnScheduleList.setClickable(false);
+//    }
+//
+//    public void enableButton() {
+//        gridView.setClickable(true);
+//        gridView.setFocusable(true);
+//        ivNext.setClickable(true);
+//        ivPrevious.setClickable(true);
+//        btnScheduleList.setClickable(true);
+//    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onClick(View v) {
         TranslateAnimation animationNext = (TranslateAnimation) AnimationUtils.loadAnimation(getActivity().getBaseContext(), R.anim.fragment_anim);
@@ -189,8 +220,10 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
         builder.setView(view);
         for (int i = 0; i < arrEnventCalendar.size(); i++) {
             TextView textView = new TextView(context);
-            textView.setText("["+arrEnventCalendar.get(i).getNoteName()+"]" + "\n" + arrEnventCalendar.get(i).getNoteContent() + "\n"
-                    + arrEnventCalendar.get(i).getTime() + "\n" + arrEnventCalendar.get(i).getDate() + "\n" +
+            textView.setTextColor(Color.BLACK);
+            textView.setTextSize(20);
+            textView.setText("Tiêu đề : " + arrEnventCalendar.get(i).getNoteName() + "" + "\n" + "Nội dung : " + arrEnventCalendar.get(i).getNoteContent() + "\n"
+                    + "Thời gian : " + arrEnventCalendar.get(i).getTime() + "\n" + "Ngày : " + arrEnventCalendar.get(i).getDate() + "\n" +
                     "-----------------------------------------------------");
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
             params.setMargins(20, 10, 0, 10);
@@ -201,4 +234,56 @@ public class MainFragment extends Fragment implements View.OnClickListener, Adap
         dialog.show();
     }
 
+    public void confirmDialog(final TextView tv) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), android.R.style.Theme_DeviceDefault_Dialog_NoActionBar);
+        builder.setTitle("Bạn có muốn xóa sự kiện không ?");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                int date = Integer.parseInt(tv.getText().toString());
+                int month = currentDisplayMonth + 1;
+                int year = currentDisplayYear;
+                if (arrEnventCalendar.isEmpty()) {
+                    Intent intent = new Intent(getActivity().getBaseContext(), MyService.class);
+                    getActivity().stopService(intent);
+                }
+                for (int i = arrEnventCalendar.size() - 1; i >= 0; i--) {
+                    EventCalendar eventCalendar = arrEnventCalendar.get(i);
+                    if (date == eventCalendar.getDay() && month == eventCalendar.getMonth() && year == eventCalendar.getYear()) {
+                        database.deleteEvent(eventCalendar);
+                        arrEnventCalendar.remove(i);
+                        initCalendar();
+                    }
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        Dialog dialog = builder.create();
+        dialog.show();
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        TextView tv = (TextView) view.findViewById(R.id.tvDate);
+        confirmDialog(tv);
+        return true;
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                v.setBackgroundResource(R.drawable.oval_bg_on_touch);
+                break;
+            case MotionEvent.ACTION_UP:
+                v.setBackgroundResource(R.drawable.oval_bg);
+                break;
+        }
+        return false;
+    }
 }
